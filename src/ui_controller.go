@@ -1,7 +1,7 @@
 package main
 
 import (
-	"strings"
+	"fmt"
 
 	"github.com/pterm/pterm"
 )
@@ -22,10 +22,9 @@ func MainMenu() bool {
 	}
 
 	printer := pterm.DefaultInteractiveSelect.
-		WithOptions(options).
-		WithFilterInputPlaceholder("🔍 Start typing")
+		WithOptions(options)
 
-	option, err := printer.Show("select option")
+	option, err := printer.Show("Select an option")
 	if err != nil {
 		return true
 	}
@@ -33,6 +32,9 @@ func MainMenu() bool {
 	switch option {
 	case mainMenu_newSession:
 		NewSession()
+		return true
+	case mainMenu_openSession:
+		OpenSession()
 		return true
 	case mainMenu_exit:
 		return false
@@ -43,10 +45,43 @@ func MainMenu() bool {
 
 func NewSession() {
 	sessionName, err := pterm.DefaultInteractiveTextInput.Show("Enter new session name")
-	sessionName = strings.TrimSpace(sessionName)
+	// TODO Option to cancel
 	if err != nil || sessionName == "" {
 		return
 	}
 
 	TmuxNewSession(sessionName)
+}
+
+func OpenSession() {
+	ok, allSessions := listSessions()
+	if !ok {
+		return
+	}
+
+	if allSessions == nil {
+		pterm.Println("There are no active sessions")
+		return
+	}
+
+	printer := pterm.DefaultInteractiveSelect.
+		WithOptions(allSessions).
+		WithFilterInputPlaceholder("🔍 Start typing")
+
+	option, err := printer.Show("Select an option")
+	if err != nil {
+		return
+	}
+
+	TmuxAttachSession(option)
+}
+
+func listSessions() (ok bool, sessions []string) {
+	sessions, err := TmuxListSessions()
+	if err != nil {
+		pterm.Error.Println(fmt.Sprintf("failed listing sessions: %v", err))
+		return false, nil
+	}
+
+	return true, sessions
 }
