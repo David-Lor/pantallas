@@ -7,10 +7,10 @@ import (
 )
 
 const (
-	mainMenu_newSession   = "New session"
-	mainMenu_openSession  = "Open session"
-	mainMenu_killSessions = "Kill sessions"
-	mainMenu_exit         = "Exit"
+	mainMenu_newSession   = "✨New session"
+	mainMenu_openSession  = "📂Open session"
+	mainMenu_killSessions = "💥Kill sessions"
+	mainMenu_exit         = "👋Exit"
 )
 
 func MainMenu() bool {
@@ -47,7 +47,7 @@ func MainMenu() bool {
 }
 
 func NewSession() {
-	sessionName, err := pterm.DefaultInteractiveTextInput.Show("Enter new session name")
+	sessionName, err := pterm.DefaultInteractiveTextInput.Show("✨Enter the new session name")
 	// TODO Option to cancel
 	if err != nil || sessionName == "" {
 		return
@@ -62,7 +62,7 @@ func OpenSession() {
 		return
 	}
 	if allSessions == nil {
-		pterm.Println("There are no active sessions")
+		pterm.Println("🙅There are no active sessions")
 		return
 	}
 
@@ -84,7 +84,7 @@ func KillSessions() {
 		return
 	}
 	if allSessions == nil {
-		pterm.Println("There are no active sessions")
+		pterm.Println("🙅There are no active sessions")
 		return
 	}
 
@@ -92,7 +92,7 @@ func KillSessions() {
 		WithOptions(allSessions).
 		WithFilterInputPlaceholder("🔍 Start typing")
 
-	selectedOptions, err := printer.Show("Select the panels to kill")
+	selectedOptions, err := printer.Show("💥Select the panels to kill")
 	if err != nil {
 		return
 	}
