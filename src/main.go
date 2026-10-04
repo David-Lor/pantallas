@@ -1,16 +1,22 @@
 package main
 
 import (
-	"fmt"
 	"os"
+
+	"github.com/pterm/pterm"
 )
 
 func main() {
 	LoadSettings()
 	if !CheckTmux() {
-		fmt.Println("tmux not installed")
+		pterm.Error.Println("tmux is not installed")
 		os.Exit(1)
 	}
 
-	TmuxNewSession("foo")
+	for {
+		if !MainMenu() {
+			break
+		}
+		// TODO clear?
+	}
 }
