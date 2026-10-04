@@ -7,17 +7,17 @@ import (
 )
 
 const (
-	mainMenu_newSession  = "New session"
-	mainMenu_openSession = "Open session"
-	mainMenu_killSession = "Kill session"
-	mainMenu_exit        = "Exit"
+	mainMenu_newSession   = "New session"
+	mainMenu_openSession  = "Open session"
+	mainMenu_killSessions = "Kill sessions"
+	mainMenu_exit         = "Exit"
 )
 
 func MainMenu() bool {
 	options := []string{
 		mainMenu_newSession,
 		mainMenu_openSession,
-		mainMenu_killSession,
+		mainMenu_killSessions,
 		mainMenu_exit,
 	}
 
@@ -35,6 +35,9 @@ func MainMenu() bool {
 		return true
 	case mainMenu_openSession:
 		OpenSession()
+		return true
+	case mainMenu_killSessions:
+		KillSessions()
 		return true
 	case mainMenu_exit:
 		return false
@@ -58,7 +61,6 @@ func OpenSession() {
 	if !ok {
 		return
 	}
-
 	if allSessions == nil {
 		pterm.Println("There are no active sessions")
 		return
@@ -74,6 +76,29 @@ func OpenSession() {
 	}
 
 	TmuxAttachSession(option)
+}
+
+func KillSessions() {
+	ok, allSessions := listSessions()
+	if !ok {
+		return
+	}
+	if allSessions == nil {
+		pterm.Println("There are no active sessions")
+		return
+	}
+
+	printer := pterm.DefaultInteractiveMultiselect.
+		WithOptions(allSessions).
+		WithFilterInputPlaceholder("🔍 Start typing")
+
+	selectedOptions, err := printer.Show("Select the panels to kill")
+	if err != nil {
+		return
+	}
+
+	TmuxKillSessions(selectedOptions)
+	// TODO parse errors, show ok/ko for killed panels
 }
 
 func listSessions() (ok bool, sessions []string) {

@@ -12,11 +12,7 @@ func CheckTmux() bool {
 }
 
 func TmuxNewSession(name string) {
-	cmd := exec.Command(Settings.TmuxPath, "new-session", "-s", name)
-	cmd.Stdin = os.Stdin
-	cmd.Stdout = os.Stdout
-	cmd.Stderr = os.Stderr
-	_ = cmd.Run()
+	runInteractiveTmuxCmd("new-session", "-s", name)
 }
 
 func TmuxListSessions() ([]string, error) {
@@ -29,7 +25,21 @@ func TmuxListSessions() ([]string, error) {
 }
 
 func TmuxAttachSession(name string) {
-	cmd := exec.Command(Settings.TmuxPath, "attach-session", "-t", name)
+	runInteractiveTmuxCmd("attach-session", "-t", name)
+}
+
+func TmuxKillSessions(sessions []string) {
+	for _, session := range sessions {
+		TmuxKillSession(session)
+	}
+}
+
+func TmuxKillSession(name string) {
+	runInteractiveTmuxCmd("kill-session", "-t", name)
+}
+
+func runInteractiveTmuxCmd(arg ...string) {
+	cmd := exec.Command(Settings.TmuxPath, arg...)
 	cmd.Stdin = os.Stdin
 	cmd.Stdout = os.Stdout
 	cmd.Stderr = os.Stderr
