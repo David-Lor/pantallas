@@ -12,5 +12,5 @@ func main() {
 		os.Exit(1)
 	}
 
-	fmt.Println("ok")
+	TmuxNewSession("foo")
 }
