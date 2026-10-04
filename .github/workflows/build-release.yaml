@@ -1,0 +1,67 @@
+name: Build release
+on:
+  workflow_dispatch:
+    inputs:
+      version:
+        type: string
+        required: false
+permissions:
+  contents: write
+
+jobs:
+  build:
+    name: Build (${{matrix.os}}/${{matrix.arch}})
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        os:
+          - linux
+          - darwin
+          - windows
+        arch:
+          - amd64
+          - arm64
+          - arm
+        exclude:
+          - os: darwin
+            arch: arm
+          - os: windows
+            arch: arm
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v7
+
+      - name: Find release by name
+        id: find_release
+        if: ${{ github.event.inputs.version != '' }}
+        uses: cardinalby/git-get-release-action@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          releaseName: ${{ github.event.inputs.version }}
+
+      - name: Generate artifact name
+        run:
+          echo "OUTPUT=/tmp/pantallas-${{github.event.inputs.version}}-${{matrix.os}}-${{matrix.arch}}" >> $GITHUB_ENV
+      - name: Append .exe to artifact name
+        if: ${{ matrix.os == 'windows' }}
+        run:
+          echo "OUTPUT=${{env.OUTPUT}}.exe" >> $GITHUB_ENV
+
+      - name: Build
+        env:
+          GOOS: ${{ matrix.os }}
+          GOARCH: ${{ matrix.arch }}
+          GOARM: ${{ case(matrix.arch == 'arm', '7', '') }}
+          CGO_ENABLED: 0
+        working-directory: src
+        run:
+          go build -ldflags="-s -w" -o "${{env.OUTPUT}}" .
+
+      - name: Upload artifacts
+        if: ${{ github.event.inputs.version != '' }}
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: ${{ steps.find_release.outputs.tag_name }}
+          files: ${{ env.OUTPUT }}
