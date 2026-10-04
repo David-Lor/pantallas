@@ -1,2 +1,3 @@
-# generic-template
-My custom template for generic repositories
+# pantallas
+
+interactive, simple tmux session manager
