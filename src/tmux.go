@@ -7,21 +7,21 @@ import (
 )
 
 func CheckTmux() bool {
-	err := exec.Command(Settings.TmuxPath, "ls").Run()
-	return err == nil
+	out, _ := exec.Command(Settings.TmuxPath, "--help").CombinedOutput()
+	return strings.Contains(string(out), "usage: tmux")
 }
 
 func TmuxNewSession(name string) {
 	runInteractiveTmuxCmd("new-session", "-s", name)
 }
 
-func TmuxListSessions() ([]string, error) {
+func TmuxListSessions() []string {
 	output, err := exec.Command(Settings.TmuxPath, "list-sessions", "-F", "#{session_name}").Output()
 	if err != nil {
-		return nil, err
+		return nil
 	}
 
-	return strings.Split(string(output), "\n"), nil
+	return strings.Split(string(output), "\n")
 }
 
 func TmuxAttachSession(name string) {

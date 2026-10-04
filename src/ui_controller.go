@@ -1,8 +1,6 @@
 package main
 
 import (
-	"fmt"
-
 	"github.com/pterm/pterm"
 )
 
@@ -57,10 +55,7 @@ func NewSession() {
 }
 
 func OpenSession() {
-	ok, allSessions := listSessions()
-	if !ok {
-		return
-	}
+	allSessions := TmuxListSessions()
 	if allSessions == nil {
 		pterm.Println("🙅There are no active sessions")
 		return
@@ -79,10 +74,7 @@ func OpenSession() {
 }
 
 func KillSessions() {
-	ok, allSessions := listSessions()
-	if !ok {
-		return
-	}
+	allSessions := TmuxListSessions()
 	if allSessions == nil {
 		pterm.Println("🙅There are no active sessions")
 		return
@@ -99,14 +91,4 @@ func KillSessions() {
 
 	TmuxKillSessions(selectedOptions)
 	// TODO parse errors, show ok/ko for killed panels
-}
-
-func listSessions() (ok bool, sessions []string) {
-	sessions, err := TmuxListSessions()
-	if err != nil {
-		pterm.Error.Println(fmt.Sprintf("failed listing sessions: %v", err))
-		return false, nil
-	}
-
-	return true, sessions
 }
