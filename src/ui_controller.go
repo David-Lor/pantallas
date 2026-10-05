@@ -25,8 +25,14 @@ func MainMenu() bool {
 		mmExit,
 	}
 
+	// Hide menu options when no sessions available
+	if len(TmuxListSessions()) == 0 {
+		options[0] = "" // open session
+		options[2] = "" // kill sessions
+	}
+
 	printer := pterm.DefaultInteractiveSelect.
-		WithOptions(options)
+		WithOptions(ClearArray(options))
 
 	option, err := printer.Show("Select an option")
 	if err != nil {
