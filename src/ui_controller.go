@@ -5,18 +5,24 @@ import (
 )
 
 const (
-	mainMenu_newSession   = "✨New session"
-	mainMenu_openSession  = "📂Open session"
-	mainMenu_killSessions = "💥Kill sessions"
-	mainMenu_exit         = "👋Exit"
+	mmNewSession   = "✨New session"
+	mmOpenSession  = "📂Open session"
+	mmKillSessions = "💥Kill sessions"
+	mmExit         = "👋Exit"
+
+	msgEnterNewSession  = "✨Enter the new session name"
+	msgNoActiveSessions = "🙅There are no active sessions"
+	msgSearch           = "🔍Start typing"
+	msgSelectOption     = "Select an option"
+	msgSelectKill       = "💥Select the panels to kill"
 )
 
 func MainMenu() bool {
 	options := []string{
-		mainMenu_newSession,
-		mainMenu_openSession,
-		mainMenu_killSessions,
-		mainMenu_exit,
+		mmOpenSession,
+		mmNewSession,
+		mmKillSessions,
+		mmExit,
 	}
 
 	printer := pterm.DefaultInteractiveSelect.
@@ -28,16 +34,16 @@ func MainMenu() bool {
 	}
 
 	switch option {
-	case mainMenu_newSession:
+	case mmNewSession:
 		NewSession()
 		return true
-	case mainMenu_openSession:
+	case mmOpenSession:
 		OpenSession()
 		return true
-	case mainMenu_killSessions:
+	case mmKillSessions:
 		KillSessions()
 		return true
-	case mainMenu_exit:
+	case mmExit:
 		return false
 	default:
 		return true
@@ -45,7 +51,7 @@ func MainMenu() bool {
 }
 
 func NewSession() {
-	sessionName, err := pterm.DefaultInteractiveTextInput.Show("✨Enter the new session name")
+	sessionName, err := pterm.DefaultInteractiveTextInput.Show(msgEnterNewSession)
 	// TODO Option to cancel
 	if err != nil || sessionName == "" {
 		return
@@ -57,15 +63,15 @@ func NewSession() {
 func OpenSession() {
 	allSessions := TmuxListSessions()
 	if allSessions == nil {
-		pterm.Println("🙅There are no active sessions")
+		pterm.Println(msgNoActiveSessions)
 		return
 	}
 
 	printer := pterm.DefaultInteractiveSelect.
 		WithOptions(allSessions).
-		WithFilterInputPlaceholder("🔍 Start typing")
+		WithFilterInputPlaceholder(msgSearch)
 
-	option, err := printer.Show("Select an option")
+	option, err := printer.Show(msgSelectOption)
 	if err != nil {
 		return
 	}
@@ -76,15 +82,15 @@ func OpenSession() {
 func KillSessions() {
 	allSessions := TmuxListSessions()
 	if allSessions == nil {
-		pterm.Println("🙅There are no active sessions")
+		pterm.Println(msgNoActiveSessions)
 		return
 	}
 
 	printer := pterm.DefaultInteractiveMultiselect.
 		WithOptions(allSessions).
-		WithFilterInputPlaceholder("🔍 Start typing")
+		WithFilterInputPlaceholder(msgSearch)
 
-	selectedOptions, err := printer.Show("💥Select the panels to kill")
+	selectedOptions, err := printer.Show(msgSelectKill)
 	if err != nil {
 		return
 	}
