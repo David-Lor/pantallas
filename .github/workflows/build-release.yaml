@@ -5,6 +5,8 @@ on:
       version:
         type: string
         required: false
+  release:
+    types: [published]
 permissions:
   contents: write
 
@@ -12,6 +14,8 @@ jobs:
   build:
     name: Build (${{matrix.os}}/${{matrix.arch}})
     runs-on: ubuntu-latest
+    env:
+      VERSION: ${{ github.event.release.tag_name || github.event.inputs.version }}
     strategy:
       matrix:
         os:
@@ -43,7 +47,7 @@ jobs:
 
       - name: Generate artifact name
         run:
-          echo "OUTPUT=/tmp/pantallas-${{github.event.inputs.version}}-${{matrix.os}}-${{matrix.arch}}" >> $GITHUB_ENV
+          echo "OUTPUT=/tmp/pantallas-${{env.VERSION}}-${{matrix.os}}-${{matrix.arch}}" >> $GITHUB_ENV
       - name: Append .exe to artifact name
         if: ${{ matrix.os == 'windows' }}
         run:
@@ -60,8 +64,8 @@ jobs:
           go build -ldflags="-s -w" -o "${{env.OUTPUT}}" .
 
       - name: Upload artifacts
-        if: ${{ github.event.inputs.version != '' }}
+        if: ${{ env.VERSION != '' }}
         uses: softprops/action-gh-release@v2
         with:
-          tag_name: ${{ steps.find_release.outputs.tag_name }}
+          tag_name: ${{ github.event.release.tag_name || steps.find_release.outputs.tag_name }}
           files: ${{ env.OUTPUT }}
